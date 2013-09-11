@@ -17,7 +17,6 @@ ADD vhost-graphite.conf /etc/apache2/sites-available/default
 RUN (cd /opt/graphite/webapp/graphite && python manage.py syncdb --noinput)
 RUN (cd /opt/graphite && chown -R www-data:www-data storage)
 
-ADD apache_start.sh /usr/local/bin/apache_start
 ADD run.sh /usr/local/bin/run
 
 EXPOSE 80
@@ -28,7 +27,7 @@ EXPOSE 2014
 EXPOSE 2023
 EXPOSE 2024
 EXPOSE 7002
-EXPOSE 8125
+EXPOSE 8125/udp
 EXPOSE 23632
-EXPOSE 25826
+EXPOSE 25826/udp
 CMD ["/usr/local/bin/run"]
