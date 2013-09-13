@@ -3,3 +3,4 @@
 *.log
 .vagrant*
 *.gz
+*.DS_Store

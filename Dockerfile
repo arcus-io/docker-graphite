@@ -6,18 +6,15 @@ RUN RUNLEVEL=1 DEBIAN_FRONTEND=noninteractive apt-get install -y wget apache2 li
 RUN easy_install pip
 RUN pip install whisper carbon graphite-web bucky django-tagging
 
-ADD supervisor.conf /etc/supervisor/supervisor.conf
-ADD bucky.cfg /etc/bucky.cfg
-ADD carbon.conf /opt/graphite/conf/carbon.conf
-ADD graphite.wsgi /opt/graphite/conf/graphite.wsgi
-ADD local_settings.py /opt/graphite/webapp/graphite/local_settings.py
-ADD storage-schemas.conf /opt/graphite/conf/storage-schemas.conf
-ADD vhost-graphite.conf /etc/apache2/sites-available/default
+ADD .docker/supervisor.conf /etc/supervisor/supervisor.conf
+ADD .docker/bucky.cfg /etc/bucky.cfg
+ADD .docker/carbon.conf /opt/graphite/conf/carbon.conf
+ADD .docker/graphite.wsgi /opt/graphite/conf/graphite.wsgi
+ADD .docker/storage-schemas.conf /opt/graphite/conf/storage-schemas.conf
+ADD .docker/vhost-graphite.conf /etc/apache2/sites-available/default
+ADD .docker/run.sh /usr/local/bin/run
 
-RUN (cd /opt/graphite/webapp/graphite && python manage.py syncdb --noinput)
 RUN (cd /opt/graphite && chown -R www-data:www-data storage)
-
-ADD run.sh /usr/local/bin/run
 
 EXPOSE 80
 EXPOSE 2003
