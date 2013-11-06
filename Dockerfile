@@ -16,6 +16,8 @@ ADD .docker/run.sh /usr/local/bin/run
 
 RUN (cd /opt/graphite && chown -R www-data:www-data storage)
 
+VOLUME /opt/graphite
+
 EXPOSE 80
 EXPOSE 2003
 EXPOSE 2004
