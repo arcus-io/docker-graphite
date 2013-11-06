@@ -1,32 +1,26 @@
-FROM ubuntu:12.04
-MAINTAINER Arcus "http://arcus.io"
-RUN echo "deb http://archive.ubuntu.com/ubuntu precise main universe multiverse" > /etc/apt/sources.list
-RUN apt-get update
-RUN RUNLEVEL=1 DEBIAN_FRONTEND=noninteractive apt-get install -y wget apache2 libapache2-mod-wsgi python-setuptools memcached build-essential python-dev supervisor python-cairo-dev python-django python-ldap python-memcache python-pysqlite2 sqlite3 collectd
-RUN easy_install pip
-RUN pip install whisper carbon graphite-web bucky django-tagging
-
-ADD .docker/supervisor.conf /etc/supervisor/supervisor.conf
-ADD .docker/bucky.cfg /etc/bucky.cfg
-ADD .docker/carbon.conf /opt/graphite/conf/carbon.conf
-ADD .docker/graphite.wsgi /opt/graphite/conf/graphite.wsgi
-ADD .docker/storage-schemas.conf /opt/graphite/conf/storage-schemas.conf
-ADD .docker/vhost-graphite.conf /etc/apache2/sites-available/default
-ADD .docker/run.sh /usr/local/bin/run
-
-RUN (cd /opt/graphite && chown -R www-data:www-data storage)
-
-VOLUME /opt/graphite
-
-EXPOSE 80
-EXPOSE 2003
-EXPOSE 2004
-EXPOSE 2013
-EXPOSE 2014
-EXPOSE 2023
-EXPOSE 2024
-EXPOSE 7002
-EXPOSE 8125/udp
-EXPOSE 23632
-EXPOSE 25826/udp
-CMD ["/usr/local/bin/run"]
+# Forked from github.com/nickstenning/dockerfiles/graphite
+FROM	ubuntu:12.04
+RUN	echo 'deb http://us.archive.ubuntu.com/ubuntu/ precise universe' >> /etc/apt/sources.list
+RUN	apt-get -y update
+RUN	apt-get -y install python-ldap python-cairo python-django python-twisted python-django-tagging python-simplejson python-memcache python-pysqlite2 python-support python-pip gunicorn supervisor nginx-light
+RUN	pip install whisper
+RUN	pip install --install-option="--prefix=/var/lib/graphite" --install-option="--install-lib=/var/lib/graphite/lib" carbon
+RUN	pip install --install-option="--prefix=/var/lib/graphite" --install-option="--install-lib=/var/lib/graphite/webapp" graphite-web
+ADD	./nginx.conf /etc/nginx/nginx.conf
+ADD	./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+ADD	./initial_data.json /var/lib/graphite/webapp/graphite/initial_data.json
+ADD	./local_settings.py /var/lib/graphite/webapp/graphite/local_settings.py
+ADD	./carbon.conf /var/lib/graphite/conf/carbon.conf
+ADD	./storage-schemas.conf /var/lib/graphite/conf/storage-schemas.conf
+RUN	mkdir -p /var/lib/graphite/storage/whisper
+RUN	touch /var/lib/graphite/storage/graphite.db /var/lib/graphite/storage/index
+RUN	chown -R www-data /var/lib/graphite/storage
+RUN	chmod 0775 /var/lib/graphite/storage /var/lib/graphite/storage/whisper
+RUN	chmod 0664 /var/lib/graphite/storage/graphite.db
+RUN	cd /var/lib/graphite/webapp/graphite && python manage.py syncdb --noinput
+VOLUME  /var/lib/graphite
+EXPOSE	:80
+EXPOSE	:2003
+EXPOSE	:2004
+EXPOSE	:7002
+CMD	["/usr/bin/supervisord", "-n"]
