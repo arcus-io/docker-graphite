@@ -7,6 +7,7 @@ RUN	pip install whisper
 RUN	pip install --install-option="--prefix=/var/lib/graphite" --install-option="--install-lib=/var/lib/graphite/lib" carbon
 RUN	pip install --install-option="--prefix=/var/lib/graphite" --install-option="--install-lib=/var/lib/graphite/webapp" graphite-web
 ADD	./nginx.conf /etc/nginx/nginx.conf
+ADD	./collectd.conf /etc/collectd/collectd.conf
 ADD	./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 ADD	./initial_data.json /var/lib/graphite/webapp/graphite/initial_data.json
 ADD	./local_settings.py /var/lib/graphite/webapp/graphite/local_settings.py
